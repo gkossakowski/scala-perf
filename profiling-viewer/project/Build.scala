@@ -9,6 +9,8 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
+      "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.0",
+      "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.0"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
