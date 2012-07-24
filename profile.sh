@@ -89,6 +89,23 @@ function ensureYourKit {
   esac
 }
 
+# This is a function that takes input file/directory name and turns it into
+# nice directory name by applying the following transformations:
+#  * replace all spaces by '_'
+#  * replace all dots by '_'
+#  * strip down all slashes
+#
+# E.g.:
+# "Test.scala" -> "Test_scala"
+# "scala-scalap/" -> "scala-scalap"
+function turnIntoDirName {
+  local result="$1"
+  result=${result// /_}
+  result=${result//./_}
+  result=${result///}
+  echo $result
+}
+
 REVISIONS=(5f82067bbf bd8bff3370 72c104b8b7 506bcfe71 1928dff44f a56a606d54 828aa0aaa9 cb2468a8a0
            be11c92b6e 4f47fba30f 5f29da78e9 aad241e863 5d5c7801d6 5d90d00108 6e2d3f01b5 3eb0245cdd
            9ebd4f94b5 c72307ffad 51ef16f2e9 4a6ed45890 a2d1b23dbe 21814b53e9 2d68576e91 34d36108bf
@@ -109,10 +126,14 @@ function singleRev {
   echo ""
   
   export SCALA_HOME=`ensureScalac $REV`
-  export OUTPUT="$WORKDIR/$REV"
-  mkdir -p $OUTPUT
+  local REV_OUTPUT="$WORKDIR/$REV"
+  mkdir -p $REV_OUTPUT
+  touch -c $REV_OUTPUT
  
   for INPUT in "${INPUTS[@]}"; do
+    local INPUT_DIRNAME=`turnIntoDirName ${INPUT##$PWD/inputs}`
+    export OUTPUT="$REV_OUTPUT/$INPUT_DIRNAME"
+    mkdir $OUTPUT
     singleRun $INPUT | tee -a run.log
   done
 }
