@@ -1,7 +1,24 @@
-@(message: String)
+@(runs: Seq[models.BenchmarkRun])
 
-@main("Welcome to Play 2.0") {
-    
-    @play20.welcome(message)
-    
+@main("Scala compiler performance") {
+
+<div class="hero-unit">
+  <h1>Scala compiler performance</h1>
+  <p>Early prototype of Scala compiler performance tracking tool.</p>
+</div>
+
+<div class="page-header">
+   <h2>Latest builds <small>The last 10 benchmarks</small></h2>
+</div>
+<section>
+   @for(run <- runs.take(10)) {
+   <div class="row">
+     <div class="span12">
+         <p>@run.rev.sha1.take(7) -- @run.rev.description</p>
+     </div>
+ </div>
+}
+
+</section>
+
 }
