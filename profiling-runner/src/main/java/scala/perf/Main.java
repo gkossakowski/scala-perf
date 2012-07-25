@@ -1,5 +1,9 @@
 package scala.perf;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+
 import com.yourkit.api.Controller;
 import com.yourkit.api.ProfilingModes;
 
@@ -8,6 +12,7 @@ public class Main {
   private abstract static class CompilerProfiler {
     abstract protected void beforeCompile(int iterationNumber) throws Exception;
     abstract protected void afterCompile(int iterationNumber) throws Exception;
+    public void close() throws Exception {};
     
     public void run(int iterationsNumber, String[] args) throws Exception {
       Compiler compiler = new Compiler();
@@ -67,6 +72,14 @@ public class Main {
     private static final int IterationsForResult = 100;
     private long start;
     private long[] timings;
+    private final java.io.OutputStreamWriter output;
+
+    public WallClockProfiler(java.io.File outputDir) throws Exception {
+      assert(outputDir.exists());
+      java.io.File outputFile = new java.io.File(outputDir,"wallclock.txt");
+      this.output = new OutputStreamWriter(new FileOutputStream(outputFile));
+    }
+
     @Override
     public void run(int iterationsNumber, String[] args) throws Exception {
       timings = new long[iterationsNumber];
@@ -76,19 +89,19 @@ public class Main {
     protected void beforeCompile(int iterationNumber) throws Exception {
       start = System.currentTimeMillis();
     }
-    
+
     private double calcCoefficientOfVariation(int startIndex, int endIndex) {
       long sum = 0;
       int n = (endIndex-startIndex+1);
       for (int i=startIndex; i <= endIndex; i++) {
         sum += timings[i];
       }
-      double avg = sum/n;
+      double avg = ((double)sum)/n;
       long sumOfSq = 0;
       for (int i=startIndex; i <= endIndex; i++) {
         sumOfSq += timings[i]*timings[i];
       }
-      double devSq = sumOfSq/n - (avg*avg);
+      double devSq = (((double)sumOfSq)/n) - (avg*avg);
       double stdDev = java.lang.Math.sqrt(devSq);
       double cov = stdDev/avg;
       return cov;
@@ -106,8 +119,15 @@ public class Main {
         System.out.printf("cov[%3d-%3d]: %.3f%%\n", startIndex, endIndex, cov * 100);
       }
       System.out.printf("Compile[%3d]: %5d ms (wall)\n", iterationNumber, end-start);
+      output.write(String.valueOf(timing) + "\n");
     }
-    
+
+    @Override
+    public void close() throws Exception {
+      super.close();
+      output.close();
+    }
+
   }
   
   private final static class CPUSamplingProfiler extends CompilerProfiler {
@@ -147,8 +167,10 @@ public class Main {
   }
 
   public static void main(String args[]) throws Exception {
-    CompilerProfiler profiler = new WallClockProfiler();
+    File outputDir = new File(System.getenv("OUTPUT"));
+    CompilerProfiler profiler = new WallClockProfiler(outputDir);
     profiler.run(200, args);
+    profiler.close();
   }
 
 }
