@@ -61,6 +61,7 @@ function ensureScalaGitRepo {
   if [ ! -d "$SCALA_GIT_REPO" ]; then
     git clone --bare git://github.com/scala/scala.git $SCALA_GIT_REPO
   fi
+  (cd $SCALA_GIT_REPO && git fetch --all)
 }
 
 function ensureYourKit {
