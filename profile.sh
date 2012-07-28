@@ -134,6 +134,7 @@ function singleRev {
   for INPUT in "${INPUTS[@]}"; do
     local INPUT_DIRNAME=`turnIntoDirName ${INPUT##$PWD/inputs}`
     export OUTPUT="$REV_OUTPUT/$INPUT_DIRNAME"
+    export PROFILING_ITERATIONS="200"
     rm -rf "$OUTPUT"
     mkdir $OUTPUT
     singleRun $INPUT | tee -a run.log
