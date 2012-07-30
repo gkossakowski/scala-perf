@@ -1,4 +1,4 @@
-@(runs: Seq[models.BenchmarkRun])
+@(runs: Seq[models.BenchmarkRun], allBenchmarks: Seq[(String, Seq[models.Benchmark])], scalapAvgs: Seq[Option[Double]])
 
 @main("Scala compiler performance") {
 
@@ -20,5 +20,68 @@
 }
 
 </section>
+
+<pre>Here are the last 10 revs:
+@allBenchmarks.map(_._1).take(10).mkString("\n")
+There are @allBenchmarks.count(_._2.size > 0) out of @allBenchmarks.size revs that have benchmarks
+scalapAvgs.size = @scalapAvgs.size
+</pre>
+
+<script type="text/javascript">
+var sha1s = @Html(play.api.libs.json.Json.toJson(allBenchmarks.map(_._1)).toString)
+var sha1Links = @Html(play.api.libs.json.Json.toJson(allBenchmarks.map(pair => routes.SingleCompilerRev.rev(pair._1).toString)).toString)
+$(document).ready(function() {
+  var chart = new Highcharts.Chart({
+    chart: {
+      renderTo: 'charts-container',
+      type: 'line',
+      zoomType: 'x'
+    },
+    title: {
+      text: 'scalap-src average performance'
+    },
+    xAxis: {
+      labels: {
+        formatter: function() {
+          var index = this.value;
+          var sha1 = sha1s[this.value];
+          if (typeof(sha1) === "undefined")
+            return null;
+          else
+            return '<a href="' + sha1Links[index] + '">' + sha1.substring(0, 7) + '</a>';
+        }
+      }
+    },
+
+    plotOptions: {
+      series: {
+      cursor: 'pointer',
+        point: {
+          events: {
+            click: function() {
+              document.location.href=sha1Links[this.category]
+            }
+          }
+        }
+      }
+    },
+
+    tooltip: {
+      formatter: function() {
+        return '<b>' + sha1s[this.x].substring(0,7) + '</b><br/>' +
+        this.y + 'ms';
+      }
+    },
+
+    series: [{
+      name: 'scalap-src',
+      // it's interesting to note that scala.Option is mapped to null
+      data: @Html(play.api.libs.json.Json.toJson(scalapAvgs).toString)
+    }]
+  });
+});
+</script>
+
+<div id="charts-container" style="width: 100%; height: 400px"></div>
 
 }

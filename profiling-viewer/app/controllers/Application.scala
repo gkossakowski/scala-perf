@@ -21,7 +21,16 @@ object Application extends Controller {
   }
 
   def index = Action {
-    Ok(views.html.index(compilerBenchmarkRuns))
+    val revs = GitUtils.revList
+    val allBenchmarks: Seq[(String, Seq[models.Benchmark])] = for (rev <- revs) yield {
+      println("Processing " + rev)
+      rev -> Stats.benchmarks(rev)
+    }
+    val scalapAvgs: Seq[Option[Double]] = for (benchmarkSet <- allBenchmarks.map(_._2)) yield {
+      val benchmark = benchmarkSet.find(_.name == "scalap-src")
+      benchmark.map(_.wallclock.mean.value)
+    }
+    Ok(views.html.index(compilerBenchmarkRuns, allBenchmarks, scalapAvgs))
   }
   
 }
