@@ -60,6 +60,7 @@ function ensureScalac {
 }
 
 function ensureScalaGitRepo {
+  set -e
   if [ ! -d "$SCALA_GIT_REPO" ]; then
     git clone --bare git://github.com/scala/scala.git $SCALA_GIT_REPO
   fi
