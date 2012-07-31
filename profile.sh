@@ -132,6 +132,10 @@ function singleRev {
   export SCALA_HOME
   SCALA_HOME=`ensureScalac $REV` || { echo "Failed to obtain Scala $REV. Skipping."; exit 1; }
   local REV_OUTPUT="$WORKDIR/$REV"
+  if [ -d $REV_OUTPUT ]; then
+    echo "The $REV_OUTPUT already exists. Skipping running benchmarks for $REV."
+    return 0
+  fi
   mkdir -p $REV_OUTPUT
   touch -c $REV_OUTPUT
  
