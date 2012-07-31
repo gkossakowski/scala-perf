@@ -124,10 +124,8 @@ ensureYourKit
 
 function singleRev {
   set -e
-  echo ""
   REV=`resolveRev $1`
   revInfo $REV
-  echo ""
   
   export SCALA_HOME
   SCALA_HOME=`ensureScalac $REV` || { echo "Failed to obtain Scala $REV. Skipping."; exit 1; }
