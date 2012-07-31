@@ -40,12 +40,14 @@ function revInfo {
 }
 
 function ensureScalac {
+  set -e
   local REV="$1"
   local FILE_NAME="pack-$REV.tgz"
   local FILE_PATH="$SCALA_PACKS/$FILE_NAME"
   local DIR="$SCALA_PACKS/pack-$REV"
   local URL="http://scalabuilds.herokuapp.com/rev/$REV/artifacts/jenkins-artifacts/pack.tgz"
-  if [ ! -f "$FILE_PATH" ]; then
+  if [ ! -d "$DIR" ]; then
+    rm -rf $FILE_PATH
     rm -rf $DIR
     wget -q "$URL" -O $FILE_PATH
     mkdir -p $DIR
@@ -121,18 +123,21 @@ ensureScalaGitRepo
 ensureYourKit
 
 function singleRev {
+  set -e
   echo ""
   REV=`resolveRev $1`
   revInfo $REV
   echo ""
   
-  export SCALA_HOME=`ensureScalac $REV`
+  export SCALA_HOME
+  SCALA_HOME=`ensureScalac $REV` || { echo "Failed to obtain Scala $REV. Skipping."; exit 1; }
   local REV_OUTPUT="$WORKDIR/$REV"
   mkdir -p $REV_OUTPUT
   touch -c $REV_OUTPUT
  
   for INPUT in "${INPUTS[@]}"; do
-    local INPUT_DIRNAME=`turnIntoDirName ${INPUT##$PWD/inputs}`
+    local INPUT_DIRNAME
+    INPUT_DIRNAME=`turnIntoDirName ${INPUT##$PWD/inputs}`
     export OUTPUT="$REV_OUTPUT/$INPUT_DIRNAME"
     export PROFILING_ITERATIONS="200"
     rm -rf "$OUTPUT"
@@ -142,6 +147,7 @@ function singleRev {
 }
 
 for i in "${REVISIONS[@]}"; do
-  singleRev $i
-  break
+  (set -e; singleRev $i || test)
+  echo ""
+  # break
 done
