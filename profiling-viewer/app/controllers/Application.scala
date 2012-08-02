@@ -22,11 +22,10 @@ object Application extends Controller {
 
   def index = Action {
     val revs = GitUtils.revList
-    val allBenchmarks: Seq[(String, Seq[models.Benchmark])] = for (rev <- revs) yield {
-      println("Processing " + rev)
-      rev -> Stats.benchmarks(rev)
+    val allBenchmarks: Seq[models.CompilerRevBenchmarks] = for (rev <- revs) yield {
+      models.CompilerRevBenchmarks(GitUtils.compilerRev(rev), Stats.benchmarks(rev))
     }
-    val scalapAvgs: Seq[Option[Double]] = for (benchmarkSet <- allBenchmarks.map(_._2)) yield {
+    val scalapAvgs: Seq[Option[Double]] = for (benchmarkSet <- allBenchmarks.map(_.benchmarks)) yield {
       val benchmark = benchmarkSet.find(_.name == "scalap-src")
       benchmark.map(_.wallclock.mean.value)
     }

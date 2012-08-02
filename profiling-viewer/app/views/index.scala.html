@@ -1,4 +1,6 @@
-@(runs: Seq[models.BenchmarkRun], allBenchmarks: Seq[(String, Seq[models.Benchmark])], scalapAvgs: Seq[Option[Double]])
+@(runs: Seq[models.BenchmarkRun], allBenchmarks: Seq[models.CompilerRevBenchmarks], scalapAvgs: Seq[Option[Double]])
+
+@import play.api.libs.json.Json
 
 @main("Scala compiler performance") {
 
@@ -14,7 +16,7 @@
    @for(run <- runs.take(10)) {
    <div class="row">
      <div class="span12">
-         <p><a href="@routes.SingleCompilerRev.rev(run.rev.sha1)">@run.rev.sha1.take(7)</a> -- @run.rev.description</p>
+         <p><a href="@routes.SingleCompilerRev.rev(run.rev.sha1)">@run.rev.sha1.take(7)</a> -- @run.rev.commit.getShortMessage</p>
      </div>
  </div>
 }
@@ -22,14 +24,14 @@
 </section>
 
 <pre>Here are the last 10 revs:
-@allBenchmarks.map(_._1).take(10).mkString("\n")
-There are @allBenchmarks.count(_._2.size > 0) out of @allBenchmarks.size revs that have benchmarks
+@allBenchmarks.map(_.rev.sha1).take(10).mkString("\n")
+There are @allBenchmarks.count(_.benchmarks.size > 0) out of @allBenchmarks.size revs that have benchmarks
 scalapAvgs.size = @scalapAvgs.size
 </pre>
 
 <script type="text/javascript">
-var sha1s = @Html(play.api.libs.json.Json.toJson(allBenchmarks.map(_._1)).toString)
-var sha1Links = @Html(play.api.libs.json.Json.toJson(allBenchmarks.map(pair => routes.SingleCompilerRev.rev(pair._1).toString)).toString)
+var sha1s = @Html(Json.toJson(allBenchmarks.map(_.rev.sha1)).toString)
+var sha1Links = @Html(Json.toJson(allBenchmarks.map(compilerRevBenchmarks => routes.SingleCompilerRev.rev(compilerRevBenchmarks.rev.sha1).toString)).toString)
 $(document).ready(function() {
   var chart = new Highcharts.Chart({
     chart: {
