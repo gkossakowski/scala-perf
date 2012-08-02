@@ -27,7 +27,6 @@ object Stats {
 
   def benchmarks(sha1: String): Seq[models.Benchmark] = {
     for (benchmarkDir <- benchmarkDirs(sha1).force.toSeq.sortBy(_.name)) yield {
-      println(benchmarkDir)
       val timings = (benchmarkDir / "wallclock.txt").lines().map(_.toLong)
       val segmentSize = 100
       val covs = for (segment <- timings.sliding(segmentSize, 1)) yield {
