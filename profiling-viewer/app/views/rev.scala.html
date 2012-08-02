@@ -1,23 +1,21 @@
-@(sha1: String, benchmarks: Seq[models.Benchmark])
+@(compilerRevBenchmarks: models.CompilerRevBenchmarks)
 
 @main("Scala compiler performance") {
   <section>
-  <div class="row">
-     <div class="span12">
-       <h1><small>@sha1.take(7)</small> FooBar</h1>
-     </div>
-  </div>
-  @for(benchmark <- benchmarks) {
-   <div class="row">
-     <div class="span12">
-         <h3>@benchmark.name</h3>
-         <p>Mean: @(benchmark.wallclock.mean.value)ms ± @("%.2f".format(benchmark.wallclock.mean.confidenceIntervalRadius))ms 
-            (cov: @("%.2f".format(benchmark.wallclock.mean.cov*100))%;
-             @benchmark.wallclock.mean.startIterationIndex:@benchmark.wallclock.mean.endIterationIndex)</p>
-     </div>
- </div>
- }
-
-</section>
+    <div class="row">
+      <h1><small><a href="https://github.com/scala/scala/commit/@compilerRevBenchmarks.rev.sha1">@compilerRevBenchmarks.rev.sha1.take(7)</a></small>
+          @compilerRevBenchmarks.rev.commit.getShortMessage</h1>
+    </div>
+    @for(benchmark <- compilerRevBenchmarks.benchmarks) {
+      <div class="row">
+        <h3>@benchmark.name</h3>
+        <div class="span6">
+          <p>Mean: @(benchmark.wallclock.mean.value)ms ± @("%.2f".format(benchmark.wallclock.mean.confidenceIntervalRadius))ms
+              (cov: @("%.2f".format(benchmark.wallclock.mean.cov*100))%;
+               @benchmark.wallclock.mean.startIterationIndex:@benchmark.wallclock.mean.endIterationIndex)</p>
+        </div>
+      </div>
+    }
+  </section>
 
 }
