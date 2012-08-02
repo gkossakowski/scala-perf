@@ -45,7 +45,7 @@ function ensureScalac {
   local FILE_NAME="pack-$REV.tgz"
   local FILE_PATH="$SCALA_PACKS/$FILE_NAME"
   local DIR="$SCALA_PACKS/pack-$REV"
-  local URL="http://scalabuilds.herokuapp.com/rev/$REV/artifacts/jenkins-artifacts/pack.tgz"
+  local URL="http://scalabuilds.typesafe.com/$REV/pack.tgz"
   if [ ! -d "$DIR" ]; then
     rm -rf $FILE_PATH
     rm -rf $DIR
