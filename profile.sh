@@ -24,7 +24,7 @@ function singleRun {
   
   echo "SCALA_HOME is $SCALA_HOME"
   echo "Compiling profiling runner"
-  (cd profiling-runner && ./compile.sh)
+  (cd profiling-runner && ./compile.sh) || { return 1; }
   echo "Running profiling"
   echo "file list is"
   cat $FILE_LIST
@@ -49,7 +49,7 @@ function ensureScalac {
   if [ ! -d "$DIR" ]; then
     rm -rf $FILE_PATH
     rm -rf $DIR
-    wget -q "$URL" -O $FILE_PATH
+    wget -q "$URL" -O $FILE_PATH || { rm -f $FILE_PATH; return 1; }
     mkdir -p $DIR
     cd $DIR
     tar xzf $FILE_PATH
@@ -129,7 +129,7 @@ function singleRev {
   revInfo $REV
   
   export SCALA_HOME
-  SCALA_HOME=`ensureScalac $REV` || { echo "Failed to obtain Scala $REV. Skipping."; exit 1; }
+  SCALA_HOME=`ensureScalac $REV` || { echo "Failed to obtain Scala $REV. Skipping."; return 1; }
   local REV_OUTPUT="$WORKDIR/$REV"
   if [ -d $REV_OUTPUT ]; then
     echo "The $REV_OUTPUT already exists. Skipping running benchmarks for $REV."
@@ -146,11 +146,12 @@ function singleRev {
     rm -rf "$OUTPUT"
     mkdir $OUTPUT
     singleRun $INPUT | tee -a run.log
+    test ${PIPESTATUS[0]} -eq 0 || { rm -rf $REV_OUTPUT; return 1; }
   done
 }
 
 for i in "${REVISIONS[@]}"; do
-  (set -e; singleRev $i || test)
+  (set -e; singleRev $i || true)
   echo ""
   # break
 done
