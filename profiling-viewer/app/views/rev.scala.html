@@ -1,4 +1,4 @@
-@(compilerRevBenchmarks: models.CompilerRevBenchmarks)
+@(compilerRevBenchmarks: models.CompilerRevBenchmarks, revChildren: Seq[models.CompilerRev])
 
 @main("Scala compiler performance") {
   <section>
@@ -6,13 +6,44 @@
       <h1><small><a href="https://github.com/scala/scala/commit/@compilerRevBenchmarks.rev.sha1">@compilerRevBenchmarks.rev.sha1.take(7)</a></small>
           @compilerRevBenchmarks.rev.commit.getShortMessage</h1>
     </div>
+    <div class="row">
+      <div class="span6">
+        <h4>Parents</h4>
+        <ul class="unstyled">
+          @for(parentRev <- compilerRevBenchmarks.rev.commit.getParents.map(_.getName)) {
+            <li>
+              <a href="@routes.SingleCompilerRev.rev(parentRev)">@parentRev.take(7)</a>
+              <a href="@routes.RevCompare.compare(parentRev, compilerRevBenchmarks.rev.sha1)" class="btn-mini">compare</a>
+            </li>
+          }
+        </ul>
+      </div>
+      <div class="span6">
+        <h4>Children <small>(reachable from master)</small></h4>
+        <ul class="unstyled">
+          @for(childRev <- revChildren.map(_.sha1)) {
+            <li>
+              <a href="@routes.SingleCompilerRev.rev(childRev)">@childRev.take(7)</a>
+              <a href="@routes.RevCompare.compare(compilerRevBenchmarks.rev.sha1, childRev)" class="btn-mini">compare</a>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+    <div class="row">
+      <h2>Wall clock performance</h2>
+    </div>
     @for(benchmark <- compilerRevBenchmarks.benchmarks) {
       <div class="row">
         <h3>@benchmark.name</h3>
         <div class="span6">
-          <p>Mean: @(benchmark.wallclock.mean.value)ms ± @("%.2f".format(benchmark.wallclock.mean.confidenceIntervalRadius))ms
-              (cov: @("%.2f".format(benchmark.wallclock.mean.cov*100))%;
-               @benchmark.wallclock.mean.startIterationIndex:@benchmark.wallclock.mean.endIterationIndex)</p>
+          @if(benchmark.wallclock.meanLowCov.cov < 0.02) {
+              <p>Mean: @(benchmark.wallclock.meanLowCov.value)ms ± @("%.2f".format(benchmark.wallclock.meanLowCov.confidenceIntervalRadius))ms
+                (cov: @("%.2f".format(benchmark.wallclock.meanLowCov.cov*100))%;
+                @benchmark.wallclock.meanLowCov.startIterationIndex:@benchmark.wallclock.meanLowCov.endIterationIndex)</p>
+          } else {
+            <p>No statistically rigorous data gathered.</p>
+          }
         </div>
       </div>
     }

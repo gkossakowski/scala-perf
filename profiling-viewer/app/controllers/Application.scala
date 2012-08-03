@@ -27,7 +27,7 @@ object Application extends Controller {
     }
     val scalapAvgs: Seq[Option[Double]] = for (benchmarkSet <- allBenchmarks.map(_.benchmarks)) yield {
       val benchmark = benchmarkSet.find(_.name == "scalap-src")
-      benchmark.map(_.wallclock.mean.value)
+      benchmark.map(_.wallclock.meanLowCov.value)
     }
     Ok(views.html.index(compilerBenchmarkRuns, allBenchmarks, scalapAvgs))
   }
