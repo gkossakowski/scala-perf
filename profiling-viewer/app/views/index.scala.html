@@ -36,11 +36,7 @@ var gitData = {
   sha1Messages: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getShortMessage)).toString),
   sha1Timestamps: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getCommitTime.toLong*1000)).toString)
 }
-var scalapBenchmark = {
-  title: 'scalap-src average compilation time',
-  // it's interesting to note that scala.Option is mapped to null
-  timings: @Html(play.api.libs.json.Json.toJson(avgs("scalap-src")).toString)
-}
+var benchmarks = @Html(play.api.libs.json.Json.toJson(avgs).toString)
 function shortenMessage(msg, length) {
   if (msg.length > length) {
     return msg.substring(0, length-3) + '...';
@@ -75,8 +71,7 @@ function benchmarkChart(container, gitData, benchmark) {
     yAxis: {
       title: {
         text: 'Average compiling time'
-      },
-      min: 3000
+      }
     },
 
     plotOptions: {
@@ -131,17 +126,24 @@ function benchmarkChart(container, gitData, benchmark) {
       }
     },
 
+    legend: {
+      enabled: false
+    },
+
     series: [{
-      name: 'scalap-src',
       data: benchmark.timings
     }]
   });
 }
 $(document).ready(function() {
-  benchmarkChart('charts-container', scalapBenchmark)
+  @for(benchmarkName <- avgs.keys) {
+    benchmarkChart('@benchmarkName-chart', gitData, {title: '@benchmarkName', timings: benchmarks['@benchmarkName']})
+  }
 });
 </script>
 
-<div id="charts-container" style="width: 100%; height: 400px"></div>
+@for(benchmarkName <- avgs.keys) {
+  <div id="@benchmarkName-chart" style="width: 100%; height: 300px"></div>
+}
 
 }

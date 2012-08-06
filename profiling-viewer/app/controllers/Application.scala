@@ -26,11 +26,11 @@ object Application extends Controller {
     val allBenchmarks: Seq[models.CompilerRevBenchmarks] = for (rev <- revs) yield {
       models.CompilerRevBenchmarks(GitUtils.compilerRev(rev), Stats.benchmarks(rev))
     }
-    val scalapAvgs: Seq[Option[Double]] = for (benchmarkSet <- allBenchmarks.map(_.benchmarks)) yield {
-      val benchmark = benchmarkSet.find(_.name == "scalap-src")
+    def avgsFor(name: String): Seq[Option[Double]] = for (benchmarkSet <- allBenchmarks.map(_.benchmarks)) yield {
+      val benchmark = benchmarkSet.find(_.name == name)
       benchmark.map(_.wallclock.meanLowCov.value)
     }
-    val avgs = Map("scalap-src" -> scalapAvgs)
+    val avgs = benchmarkNames.map(name => name -> avgsFor(name)).toMap
     Ok(views.html.index(compilerBenchmarkRuns, allBenchmarks, avgs))
   }
   
