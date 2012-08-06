@@ -30,10 +30,14 @@ scalapAvgs.size = @scalapAvgs.size
 </pre>
 
 <script type="text/javascript">
-var sha1s = @Html(Json.toJson(allBenchmarks.map(_.rev.sha1)).toString)
-var sha1Links = @Html(Json.toJson(allBenchmarks.map(compilerRevBenchmarks => routes.SingleCompilerRev.rev(compilerRevBenchmarks.rev.sha1).toString)).toString)
-var sha1Messages = @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getShortMessage)).toString)
-var sha1Timestamps = @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getCommitTime.toLong*1000)).toString)
+var scalapBenchmark = {
+  title: 'scalap-src average compilation time',
+  sha1s: @Html(Json.toJson(allBenchmarks.map(_.rev.sha1)).toString),
+  sha1Links: @Html(Json.toJson(allBenchmarks.map(compilerRevBenchmarks => routes.SingleCompilerRev.rev(compilerRevBenchmarks.rev.sha1).toString)).toString),
+  sha1Messages: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getShortMessage)).toString),
+  sha1Timestamps: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getCommitTime.toLong*1000)).toString),
+  timings: @Html(play.api.libs.json.Json.toJson(scalapAvgs).toString)
+}
 function shortenMessage(msg, length) {
   if (msg.length > length) {
     return msg.substring(0, length-3) + '...';
@@ -41,33 +45,33 @@ function shortenMessage(msg, length) {
     return msg;
   }
 }
-$(document).ready(function() {
+function benchmarkChart(container, benchmark) {
   var chart = new Highcharts.Chart({
     chart: {
-      renderTo: 'charts-container',
+      renderTo: container,
       type: 'area',
       zoomType: 'x'
     },
     title: {
-      text: 'scalap-src average performance'
+      text: benchmark.title
     },
     xAxis: {
       labels: {
         formatter: function() {
           var index = this.value;
-          var sha1 = sha1s[this.value];
-          var timestamp = sha1Timestamps[index];
+          var sha1 = benchmark.sha1s[this.value];
+          var timestamp = benchmark.sha1Timestamps[index];
           if (typeof(sha1) === "undefined")
             return null;
           else
-            return '<a href="' + sha1Links[index] + '">' + sha1.substring(0, 7) +
+            return '<a href="' + benchmark.sha1Links[index] + '">' + sha1.substring(0, 7) +
               '<br/>' + Highcharts.dateFormat('%b %d', timestamp) + '</a>';
         }
       }
     },
     yAxis: {
       title: {
-        text: 'Average running time'
+        text: 'Average compiling time'
       },
       min: 3000
     },
@@ -78,7 +82,7 @@ $(document).ready(function() {
         point: {
           events: {
             click: function() {
-              document.location.href=sha1Links[this.category]
+              document.location.href=benchmark.sha1Links[this.category]
             }
           }
         },
@@ -118,8 +122,8 @@ $(document).ready(function() {
           var diff = (this.y-previousPoint.y)/previousPoint.y
           changePercent = '(' + Highcharts.numberFormat(diff*100, 1) + '%)'
         }
-        return sha1s[this.x].substring(0,7) + ' <b>' + shortenMessage(sha1Messages[this.x], 60) + '</b><br/>' +
-        Highcharts.dateFormat('%d %b %Y', sha1Timestamps[this.x]) + '<br/>' +
+        return benchmark.sha1s[this.x].substring(0,7) + ' <b>' + shortenMessage(benchmark.sha1Messages[this.x], 60) + '</b><br/>' +
+        Highcharts.dateFormat('%d %b %Y', benchmark.sha1Timestamps[this.x]) + '<br/>' +
         Highcharts.numberFormat(this.y, 2, '.', ' ') + ' ms ' + changePercent;
       }
     },
@@ -127,9 +131,12 @@ $(document).ready(function() {
     series: [{
       name: 'scalap-src',
       // it's interesting to note that scala.Option is mapped to null
-      data: @Html(play.api.libs.json.Json.toJson(scalapAvgs).toString)
+      data: benchmark.timings
     }]
   });
+}
+$(document).ready(function() {
+  benchmarkChart('charts-container', scalapBenchmark)
 });
 </script>
 
