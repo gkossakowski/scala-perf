@@ -30,12 +30,15 @@ scalapAvgs.size = @avgs("scalap-src").size
 </pre>
 
 <script type="text/javascript">
-var scalapBenchmark = {
-  title: 'scalap-src average compilation time',
+var gitData = {
   sha1s: @Html(Json.toJson(allBenchmarks.map(_.rev.sha1)).toString),
   sha1Links: @Html(Json.toJson(allBenchmarks.map(compilerRevBenchmarks => routes.SingleCompilerRev.rev(compilerRevBenchmarks.rev.sha1).toString)).toString),
   sha1Messages: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getShortMessage)).toString),
-  sha1Timestamps: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getCommitTime.toLong*1000)).toString),
+  sha1Timestamps: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getCommitTime.toLong*1000)).toString)
+}
+var scalapBenchmark = {
+  title: 'scalap-src average compilation time',
+  // it's interesting to note that scala.Option is mapped to null
   timings: @Html(play.api.libs.json.Json.toJson(avgs("scalap-src")).toString)
 }
 function shortenMessage(msg, length) {
@@ -45,7 +48,7 @@ function shortenMessage(msg, length) {
     return msg;
   }
 }
-function benchmarkChart(container, benchmark) {
+function benchmarkChart(container, gitData, benchmark) {
   var chart = new Highcharts.Chart({
     chart: {
       renderTo: container,
@@ -59,12 +62,12 @@ function benchmarkChart(container, benchmark) {
       labels: {
         formatter: function() {
           var index = this.value;
-          var sha1 = benchmark.sha1s[this.value];
-          var timestamp = benchmark.sha1Timestamps[index];
+          var sha1 = gitData.sha1s[this.value];
+          var timestamp = gitData.sha1Timestamps[index];
           if (typeof(sha1) === "undefined")
             return null;
           else
-            return '<a href="' + benchmark.sha1Links[index] + '">' + sha1.substring(0, 7) +
+            return '<a href="' + gitData.sha1Links[index] + '">' + sha1.substring(0, 7) +
               '<br/>' + Highcharts.dateFormat('%b %d', timestamp) + '</a>';
         }
       }
@@ -82,7 +85,7 @@ function benchmarkChart(container, benchmark) {
         point: {
           events: {
             click: function() {
-              document.location.href=benchmark.sha1Links[this.category]
+              document.location.href=gitData.sha1Links[this.category]
             }
           }
         },
@@ -122,15 +125,14 @@ function benchmarkChart(container, benchmark) {
           var diff = (this.y-previousPoint.y)/previousPoint.y
           changePercent = '(' + Highcharts.numberFormat(diff*100, 1) + '%)'
         }
-        return benchmark.sha1s[this.x].substring(0,7) + ' <b>' + shortenMessage(benchmark.sha1Messages[this.x], 60) + '</b><br/>' +
-        Highcharts.dateFormat('%d %b %Y', benchmark.sha1Timestamps[this.x]) + '<br/>' +
+        return gitData.sha1s[this.x].substring(0,7) + ' <b>' + shortenMessage(gitData.sha1Messages[this.x], 60) + '</b><br/>' +
+        Highcharts.dateFormat('%d %b %Y', gitData.sha1Timestamps[this.x]) + '<br/>' +
         Highcharts.numberFormat(this.y, 2, '.', ' ') + ' ms ' + changePercent;
       }
     },
 
     series: [{
       name: 'scalap-src',
-      // it's interesting to note that scala.Option is mapped to null
       data: benchmark.timings
     }]
   });
