@@ -112,9 +112,15 @@ $(document).ready(function() {
 
     tooltip: {
       formatter: function() {
+        var previousPoint = this.series.data[this.x-1]
+        var changePercent = '';
+        if (previousPoint != null) {
+          var diff = (this.y-previousPoint.y)/previousPoint.y
+          changePercent = '(' + Highcharts.numberFormat(diff*100, 1) + '%)'
+        }
         return sha1s[this.x].substring(0,7) + ' <b>' + shortenMessage(sha1Messages[this.x], 60) + '</b><br/>' +
         Highcharts.dateFormat('%d %b %Y', sha1Timestamps[this.x]) + '<br/>' +
-        Highcharts.numberFormat(this.y, 2, '.', ' ') + ' ms';
+        Highcharts.numberFormat(this.y, 2, '.', ' ') + ' ms ' + changePercent;
       }
     },
 
