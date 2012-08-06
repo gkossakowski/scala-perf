@@ -9,5 +9,7 @@ case class Wallclock(rawTimings: Seq[Long]) {
 }
 object Wallclock {
   /** The mean taken from the segment */
-  case class Mean(value: Double, cov: Double, confidenceIntervalRadius: Double, startIterationIndex: Int, endIterationIndex: Int)
+  case class Mean(value: Double, cov: Double, stdDev: Double, confidenceIntervalRadius: Double, startIterationIndex: Int, endIterationIndex: Int) {
+    def segmentSize = endIterationIndex - startIterationIndex
+  }
 }

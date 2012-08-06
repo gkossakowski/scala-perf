@@ -19,10 +19,10 @@ object Stats {
 
   private def stdDev(xs: Seq[Long]): Double = {
     val n = xs.size
+    assert(n > 1)
     val avg = (xs.sum: Double) / n
-    val sumOfSq = xs.map(x => x*x).sum
-    val devSq = ((sumOfSq: Double)/n) - (avg*avg)
-    math.sqrt(devSq)
+    val sqDiffSum = xs.map(x => (x-avg)*(x-avg)).sum
+    math.sqrt(sqDiffSum/(n-1))
   }
 
   def benchmarks(sha1: String): Seq[models.Benchmark] = {
@@ -30,6 +30,19 @@ object Stats {
       val timings = (benchmarkDir / "wallclock.txt").lines().map(_.toLong)
       models.Benchmark(benchmarkDir.name, models.Wallclock(timings.toSeq))
     }
+  }
+
+  def confidenceIntervalRadius(stdDev: Double, n: Int): Double = {
+    // \phi(cdfArg) = 0.995, which means we aim for confidence level of 99%
+    val cdfArg: Double = 2.576
+	cdfArg*stdDev/math.sqrt(n)
+  }
+
+  def confidenceIntervalRadiusOfDifference(stdDev1: Double, n1: Int, stdDev2: Double, n2: Int) = {
+    val diffStdDev = math.sqrt(stdDev1*stdDev1/n1 + stdDev2*stdDev2/n2)
+    // \phi(cdfArg) = 0.995, which means we aim for confidence level of 99%
+    val cdfArg: Double = 2.576
+    cdfArg*diffStdDev
   }
 
   def meanLowestCov(timings: Seq[Long]): models.Wallclock.Mean = {
@@ -48,11 +61,9 @@ object Stats {
 	    val endIndex = startIndex + segmentSize
 	    val samples = timings.slice(startIndex, endIndex).toSeq
 	    val samplesStdDev = stdDev(samples)
-	    // \phi(cdfArg) = 0.995, which means we aim for confidence level of 99%
-	    val cdfArg: Double = 2.576
-	    val confidenceIntervalRadius = cdfArg*samplesStdDev/math.sqrt(segmentSize)
+	    val radius = confidenceIntervalRadius(samplesStdDev, segmentSize)
 	    val avg = (samples.sum: Double) / segmentSize
-	    models.Wallclock.Mean(avg, cov, confidenceIntervalRadius, startIndex, endIndex)
+	    models.Wallclock.Mean(avg, cov, samplesStdDev, radius, startIndex, endIndex)
 	  }
     mean
   }
@@ -73,11 +84,9 @@ object Stats {
         val endIndex = startIndex + segmentSize
         val samples = timings.slice(startIndex, endIndex).toSeq
         val samplesStdDev = stdDev(samples)
-        // \phi(cdfArg) = 0.995, which means we aim for confidence level of 99%
-        val cdfArg: Double = 2.576
-        val confidenceIntervalRadius = cdfArg*samplesStdDev/math.sqrt(segmentSize)
+        val radius = confidenceIntervalRadius(samplesStdDev, segmentSize)
         val avg = (samples.sum: Double) / segmentSize
-        Some(models.Wallclock.Mean(avg, cov, confidenceIntervalRadius, startIndex, endIndex))
+        Some(models.Wallclock.Mean(avg, cov, samplesStdDev, radius, startIndex, endIndex))
       } else None
     mean.getOrElse(meanLowestCov(timings))
   }
