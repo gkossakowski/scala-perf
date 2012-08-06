@@ -23,11 +23,7 @@
 
 </section>
 
-<pre>Here are the last 10 revs:
-@allBenchmarks.map(_.rev.sha1).take(10).mkString("\n")
-There are @allBenchmarks.count(_.benchmarks.size > 0) out of @allBenchmarks.size revs that have benchmarks
-scalapAvgs.size = @avgs("scalap-src").size
-</pre>
+<h2>Compilation times <small>revisions from the master branch</small></h2>
 
 <script type="text/javascript">
 var gitData = {
