@@ -2,7 +2,7 @@
 
 @main("Scala compiler performance") {
   <section>
-    <div class="row">
+    <div class="page-header">
       <h1><small><a href="https://github.com/scala/scala/commit/@compilerRevBenchmarks.rev.sha1">@compilerRevBenchmarks.rev.sha1.take(7)</a></small>
           @compilerRevBenchmarks.rev.commit.getShortMessage</h1>
     </div>
@@ -30,13 +30,11 @@
         </ul>
       </div>
     </div>
-    <div class="row">
-      <h2>Wall clock performance</h2>
-    </div>
+    <h2>Wall clock performance</h2>
     @for(benchmark <- compilerRevBenchmarks.benchmarks) {
+      <h3>@benchmark.name</h3>
       <div class="row">
-        <h3>@benchmark.name</h3>
-        <div class="span6">
+        <div class="span12">
           @if(benchmark.wallclock.meanLowCov.cov < 0.02) {
               <p>Mean: @(benchmark.wallclock.meanLowCov.value)ms ± @("%.2f".format(benchmark.wallclock.meanLowCov.confidenceIntervalRadius))ms
                 (cov: @("%.2f".format(benchmark.wallclock.meanLowCov.cov*100))%;
