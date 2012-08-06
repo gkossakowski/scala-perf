@@ -22,6 +22,7 @@ object Application extends Controller {
 
   def index = Action {
     val revs = GitUtils.revList
+    val benchmarkNames = List("scalap-src", "Vector_scala", "Test_scala")
     val allBenchmarks: Seq[models.CompilerRevBenchmarks] = for (rev <- revs) yield {
       models.CompilerRevBenchmarks(GitUtils.compilerRev(rev), Stats.benchmarks(rev))
     }
@@ -29,7 +30,8 @@ object Application extends Controller {
       val benchmark = benchmarkSet.find(_.name == "scalap-src")
       benchmark.map(_.wallclock.meanLowCov.value)
     }
-    Ok(views.html.index(compilerBenchmarkRuns, allBenchmarks, scalapAvgs))
+    val avgs = Map("scalap-src" -> scalapAvgs)
+    Ok(views.html.index(compilerBenchmarkRuns, allBenchmarks, avgs))
   }
   
 }

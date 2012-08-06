@@ -1,4 +1,4 @@
-@(runs: Seq[models.BenchmarkRun], allBenchmarks: Seq[models.CompilerRevBenchmarks], scalapAvgs: Seq[Option[Double]])
+@(runs: Seq[models.BenchmarkRun], allBenchmarks: Seq[models.CompilerRevBenchmarks], avgs: Map[String, Seq[Option[Double]]])
 
 @import play.api.libs.json.Json
 
@@ -26,7 +26,7 @@
 <pre>Here are the last 10 revs:
 @allBenchmarks.map(_.rev.sha1).take(10).mkString("\n")
 There are @allBenchmarks.count(_.benchmarks.size > 0) out of @allBenchmarks.size revs that have benchmarks
-scalapAvgs.size = @scalapAvgs.size
+scalapAvgs.size = @avgs("scalap-src").size
 </pre>
 
 <script type="text/javascript">
@@ -36,7 +36,7 @@ var scalapBenchmark = {
   sha1Links: @Html(Json.toJson(allBenchmarks.map(compilerRevBenchmarks => routes.SingleCompilerRev.rev(compilerRevBenchmarks.rev.sha1).toString)).toString),
   sha1Messages: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getShortMessage)).toString),
   sha1Timestamps: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getCommitTime.toLong*1000)).toString),
-  timings: @Html(play.api.libs.json.Json.toJson(scalapAvgs).toString)
+  timings: @Html(play.api.libs.json.Json.toJson(avgs("scalap-src")).toString)
 }
 function shortenMessage(msg, length) {
   if (msg.length > length) {
