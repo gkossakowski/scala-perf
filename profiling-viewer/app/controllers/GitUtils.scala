@@ -26,8 +26,8 @@ object GitUtils {
     repository
   }
 
-  def revList: Seq[String] = {
-    val output = (sys.process.Process(List("git", "rev-list", "--first-parent", "--since=3/1/2012", "--reverse", "master"), gitRepo) !!)
+  def revList(until: String): Seq[String] = {
+    val output = (sys.process.Process(List("git", "rev-list", "--first-parent", "--since=3/1/2012", "--reverse", until), gitRepo) !!)
     output.split('\n')
   }
   

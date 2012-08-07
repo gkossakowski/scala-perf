@@ -21,7 +21,7 @@ object Application extends Controller {
   }
 
   def index = Action {
-    val revs = GitUtils.revList
+    val revs = GitUtils.revList("master")
     val benchmarkNames = List("scalap-src", "Vector_scala", "Test_scala")
     val allBenchmarks: Seq[models.CompilerRevBenchmarks] = for (rev <- revs) yield {
       models.CompilerRevBenchmarks(GitUtils.compilerRev(rev), Stats.benchmarks(rev))
