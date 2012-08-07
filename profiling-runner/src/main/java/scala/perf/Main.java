@@ -51,7 +51,7 @@ public class Main {
   }
   
   private static class WallClockProfiler extends CompilerRunner {
-    protected static final int IterationsForResult = 100;
+    protected static final int IterationsForResult = 60;
     protected long start;
     protected long[] timings;
     protected final java.io.OutputStreamWriter output;

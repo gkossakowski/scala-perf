@@ -45,8 +45,9 @@ object Stats {
     cdfArg*diffStdDev
   }
 
+  private val segmentSize = 60
+
   def meanLowestCov(timings: Seq[Long]): models.Wallclock.Mean = {
-    val segmentSize = 100
 	  val covs = (for (segment <- timings.sliding(segmentSize, 1)) yield {
 	    val n = segment.size
 	    val avg = (segment.sum: Double) / segment.size
@@ -69,7 +70,6 @@ object Stats {
   }
 
   def meanLowCov(timings: Seq[Long], covTreshold: Double): models.Wallclock.Mean = {
-    val segmentSize = 100
       val covs = (for (segment <- timings.sliding(segmentSize, 1)) yield {
         val n = segment.size
         val avg = (segment.sum: Double) / segment.size
