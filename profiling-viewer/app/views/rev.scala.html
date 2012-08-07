@@ -1,4 +1,6 @@
-@(compilerRevBenchmarks: models.CompilerRevBenchmarks, revChildren: Seq[models.CompilerRev])
+@(compilerRevBenchmarks: models.CompilerRevBenchmarks, revChildren: Seq[models.CompilerRev], allBenchmarks: Seq[models.CompilerRevBenchmarks], avgs: Map[String, Seq[Option[Double]]])
+
+@import play.api.libs.json.Json
 
 @main("Scala compiler performance") {
   <section>
@@ -52,6 +54,126 @@
         </div>
       </div>
     }
+
+<h2>Compilation times <small>all ancestor revisions (following first parent)</small></h2>
+
+<script type="text/javascript">
+var gitData = {
+  sha1s: @Html(Json.toJson(allBenchmarks.map(_.rev.sha1)).toString),
+  sha1Links: @Html(Json.toJson(allBenchmarks.map(compilerRevBenchmarks => routes.SingleCompilerRev.rev(compilerRevBenchmarks.rev.sha1).toString)).toString),
+  sha1Messages: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getShortMessage)).toString),
+  sha1Timestamps: @Html(Json.toJson(allBenchmarks.map(_.rev.commit.getCommitTime.toLong*1000)).toString)
+}
+var benchmarks = @Html(play.api.libs.json.Json.toJson(avgs).toString)
+function shortenMessage(msg, length) {
+  if (msg.length > length) {
+    return msg.substring(0, length-3) + '...';
+  } else {
+    return msg;
+  }
+}
+function benchmarkChart(container, gitData, benchmark) {
+  var chart = new Highcharts.Chart({
+    chart: {
+      renderTo: container,
+      type: 'line',
+      zoomType: 'x'
+    },
+    title: {
+      text: benchmark.title
+    },
+    xAxis: {
+      labels: {
+        formatter: function() {
+          var index = this.value;
+          var sha1 = gitData.sha1s[this.value];
+          var timestamp = gitData.sha1Timestamps[index];
+          if (typeof(sha1) === "undefined")
+            return null;
+          else
+            return '<a href="' + gitData.sha1Links[index] + '">' + sha1.substring(0, 7) +
+              '<br/>' + Highcharts.dateFormat('%b %d', timestamp) + '</a>';
+        }
+      }
+    },
+    yAxis: {
+      title: {
+        text: 'Average compiling time'
+      }
+    },
+
+    plotOptions: {
+      series: {
+        cursor: 'pointer',
+        point: {
+          events: {
+            click: function() {
+              document.location.href=gitData.sha1Links[this.category]
+            }
+          }
+        },
+      },
+      area: {
+        fillColor: {
+          linearGradient: [0, 0, 0, 300],
+          stops: [
+            [0, Highcharts.getOptions().colors[0]],
+            [1, 'rgba(2,0,0,0)']
+          ]
+        },
+        lineWidth: 1,
+        marker: {
+          enabled: false,
+          states: {
+            hover: {
+              enabled: true,
+              radius: 5
+            }
+          }
+        },
+        shadow: false,
+        states: {
+          hover: {
+            lineWidth: 1
+          }
+        }
+      }
+    },
+
+    tooltip: {
+      formatter: function() {
+        var previousPoint = this.series.data[this.x-1]
+        var changePercent = '';
+        if (previousPoint != null) {
+          var diff = (this.y-previousPoint.y)/previousPoint.y
+          changePercent = '(' + Highcharts.numberFormat(diff*100, 1) + '%)'
+        }
+        return gitData.sha1s[this.x].substring(0,7) + ' <b>' + shortenMessage(gitData.sha1Messages[this.x], 60) + '</b><br/>' +
+        Highcharts.dateFormat('%d %b %Y', gitData.sha1Timestamps[this.x]) + '<br/>' +
+        Highcharts.numberFormat(this.y, 2, '.', ' ') + ' ms ' + changePercent;
+      }
+    },
+
+    legend: {
+      enabled: false
+    },
+
+    series: [{
+      data: benchmark.timings
+    }]
+  });
+}
+$(document).ready(function() {
+  @for(benchmarkName <- avgs.keys) {
+    benchmarkChart('@benchmarkName-chart', gitData, {title: '@benchmarkName', timings: benchmarks['@benchmarkName']})
+  }
+});
+</script>
+
+@for(benchmarkName <- avgs.keys) {
+  <div id="@benchmarkName-chart" style="width: 100%; height: 300px"></div>
+}
+
   </section>
 
 }
