@@ -1,7 +1,8 @@
 set -e
 
 [ -z "$YOURKIT_AGENT" ] && echo "Need to set SCALA_AGENT variable" >&2 && exit 1;
-JAVA_CMD="java -agentpath:$YOURKIT_AGENT"
+YOURKIT_OPTION="-agentpath:$YOURKIT_AGENT=dir=$OUTPUT"
+JAVA_CMD="java $YOURKIT_OPTION"
 LIB="lib"
 YOURKIT_JAR="$LIB/yjp-controller-api-redist.jar"
 [ -z "$SCALA_HOME" ] && echo "Need to set SCALA_HOME variable" >&2 && exit 1;
