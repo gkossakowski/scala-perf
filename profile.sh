@@ -36,7 +36,7 @@ function resolveRev {
 }
 
 function revInfo {
- (cd $SCALA_GIT_REPO && git log -n 1 --pretty=format:"commit %h %ai %s" $REV)
+ (cd $SCALA_GIT_REPO && git --no-pager log -n 1 --pretty=format:"commit %h %ai %s" $REV && echo "")
 }
 
 function ensureScalac {
