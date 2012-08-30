@@ -5,6 +5,8 @@
 # Home page
 GET     /                           controllers.Application.index
 
+GET     /rev/compare/$sha1a<\p{XDigit}{40}>-$sha1b<\p{XDigit}{40}>    controllers.RevCompare.compare(sha1a, sha1b)
+
 GET     /rev/:sha1                  controllers.SingleCompilerRev.rev(sha1)
 
 # Map static resources from the /public folder to the /assets URL path

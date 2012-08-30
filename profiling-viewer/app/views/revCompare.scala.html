@@ -1,0 +1,31 @@
+@(twoBenchmarksAll: Seq[models.TwoBenchmarks], rev1: models.CompilerRev, rev2: models.CompilerRev)
+
+@main("Scala compiler performance") {
+  <section>
+    <div class="page-header">
+      <h1>Compare revisions</h1>
+    </div>
+    <div class="row">
+      <div class="span12">
+        <h4><small><a href="https://github.com/scala/scala/commit/@rev1.sha1">@rev1.sha1.take(7)</a></small>
+            @rev1.commit.getShortMessage</h4>
+        <h4><small><a href="https://github.com/scala/scala/commit/@rev2.sha1">@rev2.sha1.take(7)</a></small>
+            @rev2.commit.getShortMessage</h4>
+      </div>
+    </div>
+    <h2>Wall clock performance</h2>
+    @for(twoBenchmarks <- twoBenchmarksAll) {
+      <h4>@twoBenchmarks.name</h4>
+      <div class="row">
+        <div class="span12">
+      @if(twoBenchmarks.compare.map(_.isStatisticallySignificantDiff).getOrElse(false)) {
+          @twoBenchmarks.compare.get.meanDiff
+        } else {
+          booo
+        }
+      </div>
+    </div>
+    }
+  </section>
+
+}
