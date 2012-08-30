@@ -45,11 +45,12 @@ function ensureScalac {
   local FILE_NAME="pack-$REV.tgz"
   local FILE_PATH="$SCALA_PACKS/$FILE_NAME"
   local DIR="$SCALA_PACKS/pack-$REV"
-  local URL="http://scalabuilds.typesafe.com/$REV/pack.tgz"
+  local URL="http://scala-webapps.epfl.ch/artifacts/$REV/pack.tgz"
+  local URL_ALT="http://scala-webapps.epfl.ch/artifacts-manual/$REV/pack.tgz"
   if [ ! -d "$DIR" ]; then
     rm -rf $FILE_PATH
     rm -rf $DIR
-    wget -q "$URL" -O $FILE_PATH || { rm -f $FILE_PATH; return 1; }
+    wget -q "$URL" -O $FILE_PATH || wget -q "$URL_ALT" -O $FILE_PATH || { rm -f $FILE_PATH; return 1; }
     mkdir -p $DIR
     cd $DIR
     tar xzf $FILE_PATH
