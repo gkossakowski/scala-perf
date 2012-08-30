@@ -111,6 +111,8 @@ function turnIntoDirName {
   echo $result
 }
 
+ensureScalaGitRepo
+
 REVISIONS=(`cd scala_repo && git rev-list 2.10.x --since="3/1/2012"`)
 
 INPUTS=(`find $PWD/inputs -maxdepth 1 -mindepth 1 -name '*.scala'; find $PWD/inputs -maxdepth 1 -mindepth 1 -type d`)
@@ -118,7 +120,6 @@ INPUTS=(`find $PWD/inputs -maxdepth 1 -mindepth 1 -name '*.scala'; find $PWD/inp
 echo "INPUTS are ${INPUTS[@]}"
 
 rm -f run.log
-ensureScalaGitRepo
 ensureYourKit
 
 function singleInput {
