@@ -111,10 +111,7 @@ function turnIntoDirName {
   echo $result
 }
 
-REVISIONS=(5f82067bbf bd8bff3370 72c104b8b7 506bcfe71 1928dff44f a56a606d54 828aa0aaa9 cb2468a8a0
-           be11c92b6e 4f47fba30f 5f29da78e9 aad241e863 5d5c7801d6 5d90d00108 6e2d3f01b5 3eb0245cdd
-           9ebd4f94b5 c72307ffad 51ef16f2e9 4a6ed45890 a2d1b23dbe 21814b53e9 2d68576e91 34d36108bf
-           48b128d239 43dc4cc9f6 2e34310cb1)
+REVISIONS=(`cd scala_repo && git rev-list 2.10.x --since="3/1/2012"`)
 
 INPUTS=(`find $PWD/inputs -maxdepth 1 -mindepth 1 -name '*.scala'; find $PWD/inputs -maxdepth 1 -mindepth 1 -type d`)
 
