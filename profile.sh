@@ -151,6 +151,11 @@ function singleRev {
   for INPUT in "${INPUTS[@]}"; do
     local INPUT_DIRNAME
     INPUT_DIRNAME=`turnIntoDirName ${INPUT##$PWD/inputs}`
+    export PROFILING_TASK="wallclock"
+    singleInput $INPUT_DIRNAME || { rm -rf $REV_OUTPUT; return 1; }
+  done
+}
+
 # this function is untested and probably still doesn't produce
 # any useful results
 function memoryAllocationsRev {
