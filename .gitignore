@@ -1,4 +1,6 @@
 /scala_packs/
 /workdir/
+/workdir_classes/
 /scala_repo/
 .DS_Store
+/profiling-runner/classes/
