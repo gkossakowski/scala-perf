@@ -151,6 +151,27 @@ function singleRev {
   for INPUT in "${INPUTS[@]}"; do
     local INPUT_DIRNAME
     INPUT_DIRNAME=`turnIntoDirName ${INPUT##$PWD/inputs}`
+# this function is untested and probably still doesn't produce
+# any useful results
+function memoryAllocationsRev {
+  set -e
+  REV=`resolveRev $1`
+  revInfo $REV
+
+  export SCALA_HOME
+  SCALA_HOME=`ensureScalac $REV` || { echo "Failed to obtain Scala $REV. Skipping."; return 1; }
+  local REV_OUTPUT="$WORKDIR/$REV"
+  if [ -d $REV_OUTPUT ]; then
+    echo "The $REV_OUTPUT already exists. Skipping running benchmarks for $REV."
+    return 0
+  fi
+  mkdir -p $REV_OUTPUT
+  touch -c $REV_OUTPUT
+
+  for INPUT in "${INPUTS[@]}"; do
+    local INPUT_DIRNAME
+    INPUT_DIRNAME=`turnIntoDirName ${INPUT##$PWD/inputs}`
+    export PROFILING_TASK="allocs"
     singleInput $INPUT_DIRNAME || { rm -rf $REV_OUTPUT; return 1; }
   done
 }
