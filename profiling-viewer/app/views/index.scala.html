@@ -23,7 +23,7 @@
 
 </section>
 
-<h2>Compilation times <small>revisions from the master branch</small></h2>
+<h2>Compilation times <small>revisions from the 2.10.x branch</small></h2>
 
 <script type="text/javascript">
 var gitData = {
@@ -62,7 +62,8 @@ function benchmarkChart(container, gitData, benchmark) {
             return '<a href="' + gitData.sha1Links[index] + '">' + sha1.substring(0, 7) +
               '<br/>' + Highcharts.dateFormat('%b %d', timestamp) + '</a>';
         }
-      }
+      },
+      minRange: 50
     },
     yAxis: {
       title: {

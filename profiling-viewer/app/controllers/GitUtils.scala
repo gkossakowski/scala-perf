@@ -50,8 +50,8 @@ object GitUtils {
       override def clone(): RevFilter = new HasParentFilter(parent)
     }
     walk.setRevFilter(new HasParentFilter(commit))
-    val masterId = repo.resolve(Constants.MASTER)
-    walk.markStart(walk.lookupCommit(masterId))
+    val branch210xId = repo.resolve("2.10.x")
+    walk.markStart(walk.lookupCommit(branch210xId))
     walk.markUninteresting(commit)
     import scala.collection.JavaConverters._
     walk.iterator.asScala.map(commit => compilerRev(commit.getName)).toSeq
